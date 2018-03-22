@@ -11,9 +11,9 @@ from ops import *
 from tlu_discriminator import *
 from wrf_generator import *
 
-hps={}
+hps={} #Hyperparameters
 hps['image_size']=256
-hps['g_alph']=10**8
+hps['g_alph']=10**7
 hps['g_beta']=1
 hps['capacity']=0.1
 hps['g_lrn_rate']=2e-3
@@ -27,10 +27,10 @@ hps['outer_iter']=50
 
 
 data_path='F:\\yuda\\record\\train.tfrecords'
-raw_image= read_and_decode(data_path)
+raw_image= read_and_decode(data_path)#from tfrecord file
 img_batch = tf.train.shuffle_batch([raw_image],
-										batch_size=hps['batch_size'], capacity=10000,
-										min_after_dequeue=10)
+				batch_size=hps['batch_size'], capacity=10000,
+				min_after_dequeue=10)
 coord = tf.train.Coordinator()
 img_batch=tf.cast(img_batch, dtype=tf.float32)
 
@@ -52,7 +52,7 @@ dis_loss=dis_loss_real+dis_loss_fake
 gen_loss_fake=tf.reduce_mean(cross_entropy(fake_logits, real_label))#real/fake loss
 gen_loss_p2=tf.reduce_mean(tf.square(Gen.capacity-tf.constant(hps['image_size']*hps['image_size']*hps['capacity'])))#capacity loss
 
-gen_loss_p1=1e7*gen_loss_fake+gen_loss_p2#+1e6*gen_loss_p3
+gen_loss_p1=hps['g_alph']*gen_loss_fake+gen_loss_p2#+1e6*gen_loss_p3
 
 t_vars = tf.trainable_variables()
 
