@@ -11,18 +11,9 @@ from ops import *
 
 class WrfGenerator(object):
 	def __init__(self, hps , mode='train'):
-		"""
-		ResNet constructor.
-		Args:
-		hps: Hyperparameters.
-		images: Batches of images,tensorflow tensor, [batch_size, image_size, image_size]
-		mode: One of 'train' and 'eval'.
-		"""
 		self.hps = hps
 		self.images = tf.placeholder(tf.float32, shape=[hps['batch_size'], hps['image_size'], hps['image_size'], 1])
 		self.mode = mode
-		#self.discriminator = discriminator
-		#self.extra_train_ops=[]
 		self.bn = []
 		self.bn_cnt=0
 		
@@ -30,16 +21,9 @@ class WrfGenerator(object):
 		
 		self._set_tes_weights()
 		self._build_model()
-		#self._build_train_op()
 		self._init=tf.global_variables_initializer()
 
-#	def _conv(self, name, x, filter_size, in_filters, out_filters, strides):
 	def _build_model(self):
-		"""
-		img = read_and_decode('E:\\Workspace\\GAN\\BOSSbase_1.01\\train.tfrecords')
-		x=tf.train.shuffle_batch([img], batch_size=2, capacity=1000, min_after_dequeue=10)
-		x=tf.cast(x,dtype=tf.float32)
-		"""
 		x=self.images
 		
 		image_size=self.hps['image_size']
@@ -49,10 +33,7 @@ class WrfGenerator(object):
 		atro4_units_num = 0
 		#atro8_units_num = 2
 		#atro16_units_num = 2
-		#with tf.variable_scope('hpf_conv'):
-		#	x=self._hp
 		with tf.variable_scope('g_init'):#5x5x1 -> 5x5x30
-			#x=tf.random_uniform([1,512,512,1], minval=0,maxval=255, dtype=tf.float32)
 			x=self._res_unit(x, 1, 30, stride)
 			#x=self._batch_norm('g_init_bn', x)
 			#x=self._relu('g_init_relu', x)	
@@ -64,25 +45,11 @@ class WrfGenerator(object):
 			with tf.variable_scope('g_atro_2_%d'%i):
 				x=self._res_unit_atrous(x, 30, 30, 2, stride)
 			
-		#branch1_x=x
-		#branch2_x=x
-		#branch3_x=x
 			
 		for i in six.moves.range(1, atro4_units_num + 1):		
 			with tf.variable_scope('g_atro_4_%d'%i):
 				x=self._res_unit_atrous(x, 30, 30, 4, stride)
 		
-		
-		#for i in six.moves.range(1, atro8_units_num + 1):		
-		#	with tf.variable_scope('g_atro_8_%d'%i):
-		#		branch2_x=self._res_unit_atrous(branch2_x, 30, 30, 8, stride)
-	
-		#for i in six.moves.range(1, atro16_units_num + 1):		
-		#	with tf.variable_scope('g_atro_16_%d'%i):
-		#		branch3_x=self._res_unit_atrous(branch3_x, 30, 30, 16, stride)
-
-		#with tf.variable_scope('g_merge'):
-		#	x=branch1_x#+branch2_x+branch3_x
 		
 		x=self._conv('g_final', x,1 ,30, 1,stride)#channels 30 -> 1
 		self.first=x
@@ -97,43 +64,19 @@ class WrfGenerator(object):
 		self.rand=tf.placeholder(tf.float32, shape=self.rand_shape)#, minval=0,maxval=1, dtype=tf.float32)
 		x=tf.concat([x,self.rand],1)
 		x=self._tes(x)
-		"""
-		self.rand_test_shape=[int(x.shape[0]),2]
-		self.rand_test=tf.placeholder(tf.float32, shape=self.rand_test_shape)
-		self.test=self._tes(self.rand_test)
-		"""
-		x=tf.reshape(x,[-1, image_size, image_size, 1])
-		self.bpp=x[0]#tf.reduce_sum(tf.abs(x))/self.hps['batch_size']/self.hps['image_size']/self.hps['image_size']
-		self.stego=tf.add(x,self.images)
-		
-		"""
-		with tf.variable_scope('g_cost'):
-			self.cost= -self.hps['g_alph']*self.discriminator.cost + self.hps['g_beta']*tf.square(self.capacity - image_size*image_size*self.hps['capacity'])
-		
-		init = tf.global_variables_initializer()
-		with tf.Session() as sess:
-			coord = tf.train.Coordinator()
-			threads = tf.train.start_queue_runners(coord = coord, sess=sess)
-			sess.run(init)
-			sess.run(x)
-			#print(sess.run(x)[10000:11000])#,feed_dict={x:np.random.uniform(size=[1,512,512,1])}))
-		"""
 
+		x=tf.reshape(x,[-1, image_size, image_size, 1])
+		self.bpp=x[0]
+		self.stego=tf.add(x,self.images)
 		
 	def _gen_initconv(self, name, x):
 		with tf.variable_scope(name):
 			n = 5*5*30
 			SRMfilters = SRM()
 			kernel = tf.get_variable('DW',initializer=SRMfilters.get_filters(), trainable=False)
-			#kernel = tf.get_variable(
-			#	'DW', 
-			#	[5, 5, 1, 30],
-			#	tf.float32, 
-			#	initializer=tf.random_normal_initializer(stddev=np.sqrt(2.0/n)))
 			return tf.nn.conv2d(x, kernel, self._stride_array(1), padding='SAME')
+			
 	def _get_cap(self, pro):
-		#return tf.reduce_sum(pro, [1,2,3])
-		#t=tf.reduce_sum(pro, [1,2,3])
 		pro_1= pro/2.0
 		pro_0= 1.0-pro
 		pos1=-1.0*pro_1*tf.log(pro_1+1e-20)/tf.log(2.0)
@@ -141,23 +84,8 @@ class WrfGenerator(object):
 		zero=-1.0*pro_0*tf.log(pro_0)/tf.log(2.0)
 		cap=pos1+neg1+zero
 		cap=tf.reduce_sum(cap, axis=[1,2,3])
-		return cap#tf.reshape(cap, shape=[self.hps['batch_size'], 1])
-		#tf.reduce_sum(pro)#-2.0*pro_1*(tf.log(pro_1)/tf.log(2.0)) - pro_0*(tf.log(pro_0)/tf.log(2.0)))
-	"""
-	def _build_train_op(self):
-		trainable_variables=tf.trainable_variables()
-		generator_var=[v for v in trainable_variables if 'g_' in v.name]
-		grads = tf.gradients(self.cost, generator_var)
-		optimizer = tf.train.GradientDescentOptimizer(self.hps['g_lrn_rate'])
-		apply_op = optimizer.apply_gradients(
-					zip(grads, generator_var),
-					global_step=self.step, 
-					name='g_train_step')
-		train_ops = [apply_op] + self.extra_train_ops
-		self.train_op = tf.group(*train_ops)
-	"""
+		return cap
 	def _res_unit_atrous(self, x, in_filter, out_filter, dilation, stride):
-#	def _atrous_conv(self, name, x, filter_size, in_filters, out_filters, dilation, padding='SAME'):	
 		bn1=batch_norm(name='bn1')
 		bn2=batch_norm(name='bn2')		
 		orig_x = x
@@ -220,16 +148,6 @@ class WrfGenerator(object):
 			output = convolve(x, kernel)
 			
 			return output
-			"""
-			# 添加篇置
-			if biased:
-				biases = tf.get_variable('biases', [out_filters])
-				output = tf.nn.bias_add(output, biases)
-			if relu:
-				# ReLU 激活函数
-				output = tf.nn.relu(output, name=scope.name)
-			return output
-			"""
 	# 2D卷积
 	def _conv(self, name, x, filter_size, in_filters, out_filters, strides):
 		with tf.variable_scope(name):
@@ -245,7 +163,6 @@ class WrfGenerator(object):
 			
 			
 	def _set_tes_weights(self):
-		
 		f=open('tes_ckpt/weights.txt','r')
 		a=f.read()
 		dict = eval(a)
@@ -278,7 +195,4 @@ class WrfGenerator(object):
 					else:
 						n2 -=1
 			return n1+n2
-"""
-test = WrfGenerator(None, None,None)
-test._build_model()
-"""
+

@@ -35,9 +35,9 @@ coord = tf.train.Coordinator()
 img_batch=tf.cast(img_batch, dtype=tf.float32)
 
 Dis=TluDiscriminator(hps)#create discriminator/generator object
-Gen=WrfGenerator(hps)
+Gen=WrfGenerator(hps)#generator's model is built in its constructor
 	
-#start to build the model
+#start to build the discriminator model
 real_logits,real_pred =Dis._build_model(Gen.images, Gen.pro)
 real_label=tf.placeholder(tf.float32, shape=[hps['batch_size'], 1])
 
