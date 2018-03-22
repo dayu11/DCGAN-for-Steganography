@@ -1,0 +1,2 @@
+model_checkpoint_path: "F:\\yuda\\10_GAN\\tes_ckpt\\tes.ckpt"
+all_model_checkpoint_paths: "F:\\yuda\\10_GAN\\tes_ckpt\\tes.ckpt"
