@@ -14,8 +14,6 @@ class WrfGenerator(object):
 		self.hps = hps
 		self.images = tf.placeholder(tf.float32, shape=[hps['batch_size'], hps['image_size'], hps['image_size'], 1])
 		self.mode = mode
-		self.bn = []
-		self.bn_cnt=0
 		
 		self.step=tf.contrib.framework.get_or_create_global_step()
 		
