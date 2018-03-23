@@ -1,5 +1,5 @@
 """
-wild receptive field generator for steganography
+This code implement a generator which can produce embedding probility map
 """
 
 import numpy as np
