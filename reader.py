@@ -1,3 +1,6 @@
+"""
+This code is used to deal with tfrecord file
+"""
 import tensorflow as tf
 import numpy as np
 import os
