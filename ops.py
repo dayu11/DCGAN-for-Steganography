@@ -1,3 +1,6 @@
+"""
+This code include some of the methods used in y-DCGAN
+"""
 import numpy as np
 import tensorflow as tf
 from PIL import Image
