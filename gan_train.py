@@ -11,7 +11,10 @@ from ops import *
 from tlu_discriminator import *
 from wrf_generator import *
 
-hps={} #Hyperparameters
+"""
+Set hyperparameters
+"""
+hps={} 
 hps['image_size']=256
 hps['g_alph']=10**7
 hps['g_beta']=1
@@ -27,24 +30,34 @@ hps['outer_iter']=50
 
 
 data_path='F:\\yuda\\record\\train.tfrecords'
-raw_image= read_and_decode(data_path)#from tfrecord file
+"""
+read tfrecord file
+"""
+raw_image= read_and_decode(data_path)
 img_batch = tf.train.shuffle_batch([raw_image],
 				batch_size=hps['batch_size'], capacity=10000,
 				min_after_dequeue=10)
 coord = tf.train.Coordinator()
 img_batch=tf.cast(img_batch, dtype=tf.float32)
-
-Dis=TluDiscriminator(hps)#create discriminator/generator object
-Gen=WrfGenerator(hps)#generator's model is built in its constructor
+"""
+Create discriminator/generator object
+Generator's model is built in its constructor
+"""
+Dis=TluDiscriminator(hps)
+Gen=WrfGenerator(hps)
 	
-#start to build the discriminator model
+"""
+Start to build discriminator model
+"""
 real_logits,real_pred =Dis._build_model(Gen.images, Gen.pro)
 real_label=tf.placeholder(tf.float32, shape=[hps['batch_size'], 1])
 
 fake_logits,fake_pred =Dis._build_model(Gen.stego, Gen.pro, True)
 fake_label=tf.placeholder(tf.float32, shape=[hps['batch_size'], 1])
 
-#build loss terms
+"""
+Build loss terms
+"""
 dis_loss_real=tf.reduce_mean(cross_entropy(real_logits, real_label))
 dis_loss_fake=tf.reduce_mean(cross_entropy(fake_logits, fake_label))
 dis_loss=dis_loss_real+dis_loss_fake
@@ -59,7 +72,9 @@ t_vars = tf.trainable_variables()
 d_vars = [var for var in t_vars if 'd_' in var.name]
 g_vars = [var for var in t_vars if 'g_' in var.name]
 
-#build optimizer
+"""
+Build optimizers
+"""
 dis_optimizer = tf.train.AdamOptimizer(hps['d_lrn_rate'], beta1=0.5)
 min_dis_loss= dis_optimizer.minimize(dis_loss, var_list = d_vars)
 dis_train_op=[min_dis_loss]
@@ -75,9 +90,15 @@ try:
 except:
 	useless=0
 
-#control the usage of GPU memory
+"""
+Control the usage of memory
+"""
 sess_config=tf.ConfigProto()
 sess_config.gpu_options.per_process_gpu_memory_fraction=0.45
+
+"""
+Ready to run tensors!
+"""
 with tf.Session(config=sess_config) as sess:
 	
 	if(hps['mode']==True):
@@ -91,7 +112,9 @@ with tf.Session(config=sess_config) as sess:
 	real_truth=get_label(True)
 	fake_truth=get_label(False)
 	if(hps['mode']==True):
-		#training process
+		"""
+		Training process
+		"""
 		for i in range(hps['outer_iter']):
 			for j in range(hps['step_num']):
 				step=sess.run(Gen.step)
@@ -115,7 +138,9 @@ with tf.Session(config=sess_config) as sess:
 					print('%d step: '%step, d_loss, ' ', l1, l2)
 
 	else :
-		#testing process
+		"""
+		Testing process
+		"""
 		test_data=get_test_data('F:\\yuda\\BOSS_256_8')
 		test_data=np.reshape(test_data, [int(test_data.shape[0]), 256, 256, 1])
 		count=0
