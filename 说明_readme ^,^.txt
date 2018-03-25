@@ -1,5 +1,4 @@
-��Ƹ�����ʱ�����ѧϰ�ĸ������ߣ����ڻ�ͷ�����������಻��֮����
-���������Ŷ���д��������չ�ֳ���tensorflow��ʹ�þ���Ͷ�CNN��������������˽⡣
-��Щ���ǽ������ѧϰ/������Ӿ����湤�������û�����
+设计该网络时是深度学习的刚入门者，现在回头看发现了许多不足之处。
+但笔者相信独立写出该网络展现出了tensorflow的使用经验和对CNN网络基本操作的了解。为进行我感兴趣的深度学习/计算机视觉方面工作奠定了基础。
 
-֮����ʵ����ʦ�ֺ������������CNN���磬ʹ����DenseNet,bottleneck,group convolution�������ԣ���get����һЩʵ��ѵ������ľ��顣
+之后还与实验室师兄合作做了另外的CNN网络，使用了DenseNet,bottleneck,group convolution等新特性，并get到了一些实际训练网络的经验。
