@@ -41,21 +41,21 @@ class TluDiscriminator(object):
 				x=self._res_unit(x, 32, 32, stride_1,5)#,channels 30-> 32
 			
 			with tf.variable_scope('d_res2'):
-				x=self._res_unit_bottleneck(x, 32, 64, stride_1, 5)
+				x=self._res_unit_bottleneck(x, 32, 64, stride_1, 5)#128
 			with tf.variable_scope('d_res3'):				
 				x=self._res_unit(x, 64, 64, stride_1,5)
 				
 			with tf.variable_scope('d_res4'):
-				x=self._res_unit_bottleneck(x, 64, 128, stride_1, 5)
+				x=self._res_unit_bottleneck(x, 64, 128, stride_1, 5)#64
 
 			with tf.variable_scope('d_res6'):
-				x=self._res_unit_bottleneck(x, 128, 256, stride_1, 5)
+				x=self._res_unit_bottleneck(x, 128, 256, stride_1, 5)#32
 
 			with tf.variable_scope('d_res8'):
-				x=self._res_unit_bottleneck(x, 256, 512, stride_1, 5)
+				x=self._res_unit_bottleneck(x, 256, 512, stride_1, 5)#16
 	
 			with tf.variable_scope('d_res10'):
-				x=self._res_unit_bottleneck(x, 512, 1024, stride_1, 5)		
+				x=self._res_unit_bottleneck(x, 512, 1024, stride_1, 5)#8	
 				
 			with tf.variable_scope('d_fc'):
 				logits=self._fully_connected(x, 1)
