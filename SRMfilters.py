@@ -1,3 +1,6 @@
+"""
+This code is used to initialize the first layer's kernels
+"""
 import numpy as np
 
 class SRM(object):

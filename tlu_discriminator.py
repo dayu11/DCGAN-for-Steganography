@@ -1,3 +1,6 @@
+"""
+This code implement a discriminator
+"""
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.training import moving_averages
@@ -25,7 +28,7 @@ class TluDiscriminator(object):
 			image_size=self.hps['image_size']
 			stride_1 = self._stride_array(1)
 			stride_2 = self._stride_array(2)
-			btnk_units = 4
+			btnk_units = 4#bottleneck unit number
 			
 			with tf.variable_scope('d_init'):#5x5x1 -> 5x5x30
 				x=input_x

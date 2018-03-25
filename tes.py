@@ -1,4 +1,4 @@
-#this code is used to train a network whick can simulate +-1 embedding
+#this code is used to train a network which can simulate +-1 embedding
 
 import tensorflow as tf
 import numpy as np
